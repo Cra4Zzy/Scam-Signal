@@ -1,0 +1,3 @@
+import Image from 'next/image'
+import Link from 'next/link'
+export default function Footer(){return <footer className="footer"><div><Image src="/scam-signal-logo.svg" alt="ScamSignal" width={190} height={50}/><p>Community Scam Intelligence</p></div><div><b>Plattform</b><Link href="/">Feed</Link><Link href="/community-richtlinien">Community-Richtlinien</Link></div><div><b>Rechtliches</b><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link><Link href="/nutzungsbedingungen">Nutzungsbedingungen</Link></div><small>© 2026 ScamSignal · Nutzerbeiträge sind Meldungen, keine behördlichen Feststellungen.</small></footer>}

@@ -1,0 +1,4 @@
+import type { Metadata } from 'next'
+import LegalShell from '@/components/legal/LegalShell'
+export const metadata: Metadata = { title: 'Impressum' }
+export default function Page(){return <LegalShell title="Impressum" notice="Vor dem öffentlichen Launch müssen hier die echten Betreiberangaben eingesetzt und rechtlich geprüft werden."><h2>Angaben gemäß § 5 DDG</h2><div className="legal-placeholder">[Vollständiger Name / Unternehmensname]<br/>[Rechtsform, falls vorhanden]<br/>[ladungsfähige Anschrift]<br/>Deutschland</div><h2>Kontakt</h2><div className="legal-placeholder">E-Mail: [kontakt@scamsignal.de]<br/>Telefon: [falls erforderlich]</div><h2>Vertretungsberechtigte Person</h2><p>[Falls juristische Person: Vertretungsberechtigte Person ergänzen.]</p><h2>Weitere Pflichtangaben</h2><p>Je nach Rechtsform, Tätigkeit und Registereintrag können zusätzliche Angaben erforderlich sein. Diese Vorlage ersetzt keine Rechtsberatung.</p></LegalShell>}
