@@ -7,8 +7,9 @@ import { normalizeIndicator } from '@/lib/utils'
 import type { Category } from '@/lib/types'
 
 type IndicatorDraft = { type: string; value: string }
-const MAX_FILES = 8
+const MAX_FILES = 5
 const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_TOTAL_SIZE = 25 * 1024 * 1024
 const ACCEPTED = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
 
 export default function NewCaseForm({ categories }: { categories: Category[] }) {
@@ -34,12 +35,29 @@ export default function NewCaseForm({ categories }: { categories: Category[] }) 
   }
 
   function selectFiles(nextFiles: File[]) {
-    const sliced = nextFiles.slice(0, MAX_FILES)
-    setFiles(sliced)
-    if (nextFiles.length > MAX_FILES) setMessage(`Maximal ${MAX_FILES} Beweisdateien pro Fall.`)
-    else if (sliced.some((f) => !ACCEPTED.has(f.type))) setMessage('Erlaubt sind JPG, PNG, WebP und PDF.')
-    else if (sliced.some((f) => f.size > MAX_FILE_SIZE)) setMessage('Jede Beweisdatei darf maximal 10 MB groß sein.')
-    else setMessage('')
+    if (nextFiles.length > MAX_FILES) {
+      setFiles([])
+      setMessage(`Maximal ${MAX_FILES} Beweisdateien pro Fall.`)
+      return
+    }
+    if (nextFiles.some((f) => !ACCEPTED.has(f.type))) {
+      setFiles([])
+      setMessage('Erlaubt sind ausschließlich JPG, PNG, WebP und PDF.')
+      return
+    }
+    if (nextFiles.some((f) => f.size <= 0 || f.size > MAX_FILE_SIZE)) {
+      setFiles([])
+      setMessage('Jede Beweisdatei darf maximal 10 MB groß sein.')
+      return
+    }
+    const combined = nextFiles.reduce((sum, f) => sum + f.size, 0)
+    if (combined > MAX_TOTAL_SIZE) {
+      setFiles([])
+      setMessage('Alle Beweisdateien zusammen dürfen maximal 25 MB groß sein.')
+      return
+    }
+    setFiles(nextFiles)
+    setMessage('')
   }
 
   function removeFile(index: number) {
@@ -70,12 +88,17 @@ export default function NewCaseForm({ categories }: { categories: Category[] }) 
     }
     if (files.some((f) => !ACCEPTED.has(f.type))) {
       setBusy(false)
-      setMessage('Erlaubt sind JPG, PNG, WebP und PDF.')
+      setMessage('Erlaubt sind ausschließlich JPG, PNG, WebP und PDF.')
       return
     }
-    if (files.some((f) => f.size > MAX_FILE_SIZE)) {
+    if (files.some((f) => f.size <= 0 || f.size > MAX_FILE_SIZE)) {
       setBusy(false)
       setMessage('Jede Beweisdatei darf maximal 10 MB groß sein.')
+      return
+    }
+    if (totalSize > MAX_TOTAL_SIZE) {
+      setBusy(false)
+      setMessage('Alle Beweisdateien zusammen dürfen maximal 25 MB groß sein.')
       return
     }
 
@@ -144,17 +167,17 @@ export default function NewCaseForm({ categories }: { categories: Category[] }) 
 
       <section className="upload-box evidence-upload-box">
         <div className="evidence-upload-head">
-          <div><b>Beweise & Dokumente</b><span>Screenshots, Bilder oder PDF-Berichte. Dateien werden privat gespeichert und nur über kurzlebige, signierte Links ausgeliefert.</span></div>
+          <div><b>Beweise & Dokumente hochladen</b><span>Füge Screenshots, Fotos oder vollständige PDF-Berichte hinzu. Die Dateien werden privat gespeichert und nur über zeitlich begrenzte Links angezeigt.</span></div>
           <span className="evidence-file-limit">JPG · PNG · WEBP · PDF</span>
         </div>
         <label className="evidence-dropzone">
           <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" multiple onChange={(e) => selectFiles(Array.from(e.target.files || []))} />
-          <strong>＋ Dateien auswählen</strong>
-          <small>Max. {MAX_FILES} Dateien · max. 10 MB je Datei</small>
+          <strong>＋ Bilder oder PDF-Berichte auswählen</strong>
+          <small>Max. 5 Dateien · 10 MB pro Datei · 25 MB insgesamt</small>
         </label>
-        {files.length > 0 && <div className="evidence-file-list">{files.map((file, index) => <div className="evidence-file-row" key={`${file.name}-${file.lastModified}-${index}`}><span className={`evidence-file-icon ${file.type === 'application/pdf' ? 'pdf' : 'image'}`}>{file.type === 'application/pdf' ? 'PDF' : 'IMG'}</span><div><b>{file.name}</b><small>{(file.size / 1024 / 1024).toFixed(2)} MB · {file.type === 'application/pdf' ? 'Dokument' : 'Bild'}</small></div><button type="button" onClick={() => removeFile(index)} aria-label={`${file.name} entfernen`}>×</button></div>)}</div>}
-        {files.length > 0 && <small className="evidence-total">{files.length} Datei(en) · {(totalSize / 1024 / 1024).toFixed(1)} MB gesamt</small>}
-        <p className="evidence-security-note"><b>Datenschutz:</b> Bilder werden serverseitig neu encodiert und EXIF-Metadaten entfernt. PDFs werden auf eine gültige PDF-Signatur geprüft. Bitte schwärze trotzdem unnötige personenbezogene Daten vor dem Upload.</p>
+        {files.length > 0 && <div className="evidence-file-list">{files.map((file, index) => <div className="evidence-file-row" key={`${file.name}-${file.lastModified}-${index}`}><span className={`evidence-file-icon ${file.type === 'application/pdf' ? 'pdf' : 'image'}`}>{file.type === 'application/pdf' ? 'PDF' : 'IMG'}</span><div><b>{file.name}</b><small>{(file.size / 1024 / 1024).toFixed(2)} MB · {file.type === 'application/pdf' ? 'PDF-Bericht' : 'Bildbeweis'}</small></div><button type="button" onClick={() => removeFile(index)} aria-label={`${file.name} entfernen`}>×</button></div>)}</div>}
+        {files.length > 0 && <small className="evidence-total">{files.length} von 5 Datei(en) · {(totalSize / 1024 / 1024).toFixed(1)} von 25 MB belegt</small>}
+        <p className="evidence-security-note"><b>Wichtig:</b> Bilder werden serverseitig neu verarbeitet und Metadaten entfernt. PDFs werden auf eine gültige PDF-Signatur geprüft. Schwärze trotzdem unnötige personenbezogene Daten, private Anschriften, Kontodaten oder Zugangsdaten vor dem Upload.</p>
       </section>
 
       <label className="check-row"><input type="checkbox" required /><span>Ich bestätige, dass ich keine privaten Adressen, Zugangsdaten oder unnötigen personenbezogenen Daten veröffentliche und meine Aussagen sachlich formuliere.</span></label>
