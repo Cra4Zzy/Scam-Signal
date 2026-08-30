@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import './redesign.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { getViewer } from '@/lib/data'
