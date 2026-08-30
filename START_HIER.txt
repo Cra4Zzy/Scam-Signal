@@ -1,0 +1,34 @@
+SCAMSIGNAL – LOKAL STARTEN
+==========================
+
+1. .env.example kopieren und die Kopie .env.local nennen.
+
+2. In .env.local eintragen:
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   SUPABASE_SECRET_KEY=sb_secret_...
+
+   Wichtig: Der Secret Key bleibt nur in .env.local und darf niemals in GitHub.
+   Alternativ akzeptiert ScamSignal SUPABASE_SERVICE_ROLE_KEY.
+
+3. Terminal im Projektordner öffnen:
+   npm.cmd install
+   npm.cmd run dev
+
+4. Verbindung prüfen:
+   http://localhost:3000/api/health
+
+   Erwartet:
+   "ok": true
+   "database": true
+   "auth": true
+   "admin": true
+   "localSignupReady": true
+
+5. Website:
+   http://localhost:3000
+
+6. Registrierung lokal:
+   Mit gültigem Server-Key wird der Testaccount automatisch bestätigt und direkt eingeloggt.
+   Bereits halb angelegte Testaccounts werden beim erneuten Registrieren automatisch repariert.
