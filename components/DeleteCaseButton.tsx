@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function DeleteCaseButton({ caseId }: { caseId: string }) {
+export default function DeleteCaseButton({ caseId, compact = false }: { caseId: string; compact?: boolean }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -31,6 +31,10 @@ export default function DeleteCaseButton({ caseId }: { caseId: string }) {
       setError(e instanceof Error ? e.message : 'Fall konnte nicht gelöscht werden.')
       setBusy(false)
     }
+  }
+
+  if (compact) {
+    return <button className="danger" type="button" onClick={removeCase} disabled={busy}>{busy ? 'Löscht …' : 'Löschen'}</button>
   }
 
   return (
