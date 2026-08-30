@@ -12,30 +12,29 @@ const indicatorIcon: Record<string, string> = {
 export default function CaseCard({ item, loggedIn }: { item: FeedCase; loggedIn: boolean }) {
   const preview = item.indicators.slice(0, 3)
   return (
-    <article className="post-card premium-post-card">
+    <article className="post-card clean-post-card">
       <VoteControl caseId={item.id} initialScore={item.score} initialVote={item.userVote} loggedIn={loggedIn} />
-      <div className="post-body">
-        <div className="post-meta">
-          <span className={`community-badge ${categoryClass(item.category)}`}>{item.categoryLabel}</span>
+      <div className="post-body clean-post-body">
+        <div className="post-topline">
+          <span className="post-author-inline"><span className="author-avatar">{item.author?.username.slice(0,2).toUpperCase() || 'SS'}</span><span>{item.author ? <><b>{item.author.display_name || item.author.username}</b><small>@{item.author.username}</small></> : <b>Unbekannter Nutzer</b>}</span></span>
+          <span className="post-topline-sep"/>
           <span>{formatRelativeTime(item.created_at)}</span>
-          <span className={`status-inline ${statusClass(item.status)}`}>{statusLabel(item.status)}</span>
           <span className="case-code">{publicCaseId(item.id)}</span>
         </div>
+
+        <div className="post-label-row"><span className={`community-badge ${categoryClass(item.category)}`}>{item.categoryLabel}</span><span className={`status-inline ${statusClass(item.status)}`}>{statusLabel(item.status)}</span></div>
 
         <div className={`post-content-grid ${item.evidencePreviewUrl ? 'has-preview' : ''}`}>
           <div className="post-copy">
             <h2><Link href={`/fall/${item.id}`}>{item.title}</Link></h2>
             <p>{item.summary || item.body.slice(0, 340)}{!item.summary && item.body.length > 340 ? '…' : ''}</p>
             {preview.length > 0 && <div className="indicator-inline-list">{preview.map((i) => <span className="indicator-inline" key={i.id}><i>{indicatorIcon[i.indicator_type] || '•'}</i><b>{i.value}</b></span>)}</div>}
-            <div className="risk-line"><span className={`risk-pill ${item.status === 'confirmed' ? 'confirmed' : item.status === 'corroborated' ? 'corroborated' : ''}`}>{item.status === 'confirmed' ? 'BESTÄTIGT' : item.status === 'corroborated' ? 'GESTÜTZT' : 'GEMELDET'}</span><span><b>{item.indicators.length}</b> Indikatoren</span><span><b>{item.evidenceCount}</b> Beweise</span></div>
+            <div className="risk-line"><span className={`risk-pill ${item.status === 'confirmed' ? 'confirmed' : item.status === 'corroborated' ? 'corroborated' : ''}`}>{item.status === 'confirmed' ? 'Bestätigt' : item.status === 'corroborated' ? 'Gestützt' : 'Gemeldet'}</span><span><b>{item.indicators.length}</b> Indikatoren</span><span><b>{item.evidenceCount}</b> Belege</span></div>
           </div>
-          {item.evidencePreviewUrl && <Link className="case-evidence-thumb" href={`/fall/${item.id}`}><img src={item.evidencePreviewUrl} alt="Beweis-Vorschau" /><span>+{Math.max(0, item.evidenceCount - 1)}</span></Link>}
+          {item.evidencePreviewUrl && <Link className="case-evidence-thumb" href={`/fall/${item.id}`}><img src={item.evidencePreviewUrl} alt="Beleg-Vorschau" /><span>{item.evidenceCount > 1 ? `+${item.evidenceCount - 1}` : 'Beleg'}</span></Link>}
         </div>
 
-        <div className="post-footer-row">
-          <div className="post-author"> <span className="author-avatar">{item.author?.username.slice(0,2).toUpperCase() || 'SS'}</span><span>{item.author ? <>Von <Link href={`/u/${item.author.username}`}><b>{item.author.display_name || item.author.username}</b></Link><small>@{item.author.username}</small></> : <>Unbekannter Nutzer</>}</span></div>
-          <div className="post-actions"><Link className="action-link" href={`/fall/${item.id}#diskussion`}>◯ <b>{item.commentCount}</b> Kommentare</Link><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={loggedIn} /><Link className="action-link" href={`/fall/${item.id}`}>↗ Teilen</Link><ReportButton caseId={item.id} loggedIn={loggedIn} /></div>
-        </div>
+        <div className="post-footer-row clean-post-footer"><span className="post-footer-context">Community-Meldung · Status kann sich durch neue Belege ändern</span><div className="post-actions"><Link className="action-link" href={`/fall/${item.id}#diskussion`}>{item.commentCount} Kommentare</Link><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={loggedIn} /><Link className="action-link" href={`/fall/${item.id}`}>Öffnen</Link><ReportButton caseId={item.id} loggedIn={loggedIn} /></div></div>
       </div>
     </article>
   )
