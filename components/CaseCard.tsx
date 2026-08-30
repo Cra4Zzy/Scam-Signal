@@ -4,12 +4,13 @@ import { categoryClass, formatRelativeTime, publicCaseId, statusClass, statusLab
 import VoteControl from '@/components/VoteControl'
 import SaveButton from '@/components/SaveButton'
 import ReportButton from '@/components/ReportButton'
+import DeleteCaseButton from '@/components/DeleteCaseButton'
 
 const indicatorIcon: Record<string, string> = {
   domain: '◎', url: '↗', wallet: '◇', phone: '◖', email: '@', social_account: '#', username: '@', other: '•'
 }
 
-export default function CaseCard({ item, loggedIn }: { item: FeedCase; loggedIn: boolean }) {
+export default function CaseCard({ item, loggedIn, canDelete = false }: { item: FeedCase; loggedIn: boolean; canDelete?: boolean }) {
   const preview = item.indicators.slice(0, 3)
   return (
     <article className="post-card clean-post-card">
@@ -34,7 +35,7 @@ export default function CaseCard({ item, loggedIn }: { item: FeedCase; loggedIn:
           {item.evidencePreviewUrl && <Link className="case-evidence-thumb" href={`/fall/${item.id}`}><img src={item.evidencePreviewUrl} alt="Beleg-Vorschau" /><span>{item.evidenceCount > 1 ? `+${item.evidenceCount - 1}` : 'Beleg'}</span></Link>}
         </div>
 
-        <div className="post-footer-row clean-post-footer"><span className="post-footer-context">Community-Meldung · Status kann sich durch neue Belege ändern</span><div className="post-actions"><Link className="action-link" href={`/fall/${item.id}#diskussion`}>{item.commentCount} Kommentare</Link><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={loggedIn} /><Link className="action-link" href={`/fall/${item.id}`}>Öffnen</Link><ReportButton caseId={item.id} loggedIn={loggedIn} /></div></div>
+        <div className="post-footer-row clean-post-footer"><span className="post-footer-context">Community-Meldung · Status kann sich durch neue Belege ändern</span><div className="post-actions"><Link className="action-link" href={`/fall/${item.id}#diskussion`}>{item.commentCount} Kommentare</Link><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={loggedIn} /><Link className="action-link" href={`/fall/${item.id}`}>Öffnen</Link>{canDelete ? <DeleteCaseButton caseId={item.id} compact /> : <ReportButton caseId={item.id} loggedIn={loggedIn} />}</div></div>
       </div>
     </article>
   )
