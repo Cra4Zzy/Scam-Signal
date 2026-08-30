@@ -4,6 +4,7 @@ import { getCaseDetail,getViewer } from '@/lib/data'
 import VoteControl from '@/components/VoteControl'
 import SaveButton from '@/components/SaveButton'
 import ReportButton from '@/components/ReportButton'
+import DeleteCaseButton from '@/components/DeleteCaseButton'
 import CommentSection from '@/components/CommentSection'
 import CopyIndicator from '@/components/CopyIndicator'
 import { formatRelativeTime,statusLabel } from '@/lib/utils'
@@ -24,6 +25,7 @@ export default async function CasePage({params}:{params:Promise<{id:string}>}){
 
   const images=item.evidence.filter((e)=>e.mime_type.startsWith('image/')&&e.signedUrl)
   const documents=item.evidence.filter((e)=>e.mime_type==='application/pdf'&&e.signedUrl)
+  const canDelete=Boolean(viewer&&(viewer.id===item.author_id||viewer.role==='admin'||viewer.role==='moderator'))
 
   return <main className="case-page"><div className="case-layout"><div><article className="case-detail">
     <div className="post-meta"><span className="community-badge">{item.categoryLabel}</span><span>{formatRelativeTime(item.created_at)}</span><span className="status-inline">{statusLabel(item.status)}</span></div>
@@ -38,5 +40,5 @@ export default async function CasePage({params}:{params:Promise<{id:string}>}){
       {documents.length>0&&<div className="evidence-documents">{documents.map(e=><a className="evidence-document-card" key={e.id} href={e.signedUrl!} target="_blank" rel="noopener noreferrer"><span className="evidence-doc-icon">PDF</span><div className="evidence-doc-copy"><b>{e.caption||'PDF-Bericht'}</b><small>{formatBytes(e.size_bytes)} · Privater Beleg</small>{e.sha256&&<code>SHA-256 {e.sha256.slice(0,16)}…</code>}</div><span className="evidence-doc-open">Öffnen ↗</span></a>)}</div>}
     </section>}
   </article><CommentSection caseId={item.id} comments={item.comments} loggedIn={Boolean(viewer)} locked={item.is_locked}/></div>
-  <aside className="right-rail"><section className="side-card"><VoteControl caseId={item.id} initialScore={item.score} initialVote={item.userVote} loggedIn={Boolean(viewer)}/><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={Boolean(viewer)}/><ReportButton caseId={item.id} loggedIn={Boolean(viewer)}/></section>{item.author&&<section className="side-card"><div className="side-card-head">VERÖFFENTLICHT VON</div><h3>@{item.author.username}</h3><Link className="ghost" href={`/u/${item.author.username}`}>Profil ansehen</Link></section>}</aside></div></main>
+  <aside className="right-rail"><section className="side-card"><VoteControl caseId={item.id} initialScore={item.score} initialVote={item.userVote} loggedIn={Boolean(viewer)}/><SaveButton caseId={item.id} initialSaved={item.saved} loggedIn={Boolean(viewer)}/><ReportButton caseId={item.id} loggedIn={Boolean(viewer)}/>{canDelete&&<DeleteCaseButton caseId={item.id}/>}</section>{item.author&&<section className="side-card"><div className="side-card-head">VERÖFFENTLICHT VON</div><h3>@{item.author.username}</h3><Link className="ghost" href={`/u/${item.author.username}`}>Profil ansehen</Link></section>}</aside></div></main>
 }
