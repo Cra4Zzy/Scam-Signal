@@ -4,7 +4,9 @@ import { createHash, randomUUID } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const MAX = 10 * 1024 * 1024
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_FILES_PER_CASE = 5
+const MAX_TOTAL_SIZE = 25 * 1024 * 1024
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
 
 function isPdf(buffer: Buffer) {
@@ -20,14 +22,32 @@ export async function POST(request: Request) {
   const caseId = String(fd.get('caseId') || '')
   const file = fd.get('file')
   if (!caseId || !(file instanceof File)) return NextResponse.json({ error: 'Ungültiger Upload.' }, { status: 400 })
-  if (!ALLOWED.has(file.type) || file.size <= 0 || file.size > MAX) return NextResponse.json({ error: 'Datei nicht erlaubt oder zu groß.' }, { status: 415 })
+  if (!ALLOWED.has(file.type) || file.size <= 0 || file.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ error: 'Datei nicht erlaubt oder zu groß.' }, { status: 415 })
+  }
 
   const { data: row } = await supabase.from('cases').select('id,author_id').eq('id', caseId).maybeSingle()
   if (!row || row.author_id !== auth.user.id) return NextResponse.json({ error: 'Keine Berechtigung.' }, { status: 403 })
 
+  const admin = createAdminClient()
+  const { data: existing, error: existingError } = await admin
+    .from('case_evidence')
+    .select('id,size_bytes')
+    .eq('case_id', caseId)
+
+  if (existingError) return NextResponse.json({ error: 'Upload-Limits konnten nicht geprüft werden.' }, { status: 500 })
+
+  const existingCount = existing?.length ?? 0
+  const existingTotal = (existing ?? []).reduce((sum, item) => sum + Number(item.size_bytes || 0), 0)
+  if (existingCount >= MAX_FILES_PER_CASE) {
+    return NextResponse.json({ error: 'Maximal 5 Beweisdateien pro Fall.' }, { status: 413 })
+  }
+  if (existingTotal + file.size > MAX_TOTAL_SIZE) {
+    return NextResponse.json({ error: 'Alle Beweisdateien zusammen dürfen maximal 25 MB groß sein.' }, { status: 413 })
+  }
+
   try {
     const source = Buffer.from(await file.arrayBuffer())
-    const admin = createAdminClient()
 
     let output: Buffer
     let mimeType: string
@@ -48,7 +68,12 @@ export async function POST(request: Request) {
       extension = 'webp'
     }
 
-    if (output.length > MAX) return NextResponse.json({ error: 'Verarbeitete Datei ist zu groß.' }, { status: 413 })
+    if (output.length > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: 'Verarbeitete Datei ist zu groß.' }, { status: 413 })
+    }
+    if (existingTotal + output.length > MAX_TOTAL_SIZE) {
+      return NextResponse.json({ error: 'Alle Beweisdateien zusammen dürfen maximal 25 MB groß sein.' }, { status: 413 })
+    }
 
     const sha256 = createHash('sha256').update(output).digest('hex')
     const path = `${auth.user.id}/${caseId}/${randomUUID()}.${extension}`
