@@ -64,6 +64,7 @@ export type CaseDetailData = FeedCase & {
     caption: string | null
     mime_type: string
     size_bytes: number
+    sha256: string | null
     signedUrl: string | null
   }>
   comments: CommentData[]
