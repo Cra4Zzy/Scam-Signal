@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function VoteControl({ caseId, initialScore, initialVote, loggedIn }: { caseId: string; initialScore: number; initialVote: -1 | 0 | 1; loggedIn: boolean }) {
+export default function VoteControl({ caseId, initialScore, initialVote, loggedIn, mode = 'rail' }: { caseId: string; initialScore: number; initialVote: -1 | 0 | 1; loggedIn: boolean; mode?: 'rail' | 'inline' }) {
   const [score, setScore] = useState(initialScore)
   const [vote, setVote] = useState<-1 | 0 | 1>(initialVote)
   const [busy, setBusy] = useState(false)
@@ -47,8 +47,18 @@ export default function VoteControl({ caseId, initialScore, initialVote, loggedI
     setBusy(false)
   }
 
+  if (mode === 'inline') {
+    return (
+      <div className="vote-inline" aria-label="Beitrag bewerten">
+        <button className={vote === 1 ? 'voted' : ''} disabled={busy} onClick={() => apply(1)} aria-label="Hilfreich"><span aria-hidden>♡</span><span>{vote === 1 ? 'Hilfreich' : 'Hilfreich'}</span></button>
+        <b>{score}</b>
+        <button className={vote === -1 ? 'voted down-voted' : ''} disabled={busy} onClick={() => apply(-1)} aria-label="Nicht hilfreich">−</button>
+      </div>
+    )
+  }
+
   return (
-    <aside className="vote-box" aria-label="Abstimmung">
+    <aside className="vote-box vote-rail" aria-label="Abstimmung">
       <button className={vote === 1 ? 'voted' : ''} disabled={busy} onClick={() => apply(1)} aria-label="Upvote">▲</button>
       <b>{score}</b>
       <button className={vote === -1 ? 'voted down-voted' : ''} disabled={busy} onClick={() => apply(-1)} aria-label="Downvote">▼</button>
