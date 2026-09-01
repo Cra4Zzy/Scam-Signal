@@ -4,6 +4,7 @@ import './redesign.css'
 import './evidence.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import MobileBottomNav from '@/components/MobileBottomNav'
 import { getViewer } from '@/lib/data'
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Header viewer={viewer} />
         {children}
         <Footer />
+        <MobileBottomNav viewer={viewer} />
       </body>
     </html>
   )
