@@ -30,8 +30,8 @@ button,input,select,textarea{font-family:inherit}
 /* Header */
 .app-header.site-header{height:auto;min-height:76px;display:block;padding:0;background:rgba(255,254,250,.92);border-bottom:1px solid var(--ss-line);backdrop-filter:blur(18px);position:sticky;top:0;z-index:80}
 .site-header-inner{width:var(--ss-shell);min-height:76px;margin:0 auto;display:grid;grid-template-columns:auto auto minmax(240px,1fr) auto;align-items:center;gap:28px}
-.brand.brand-lockup{display:flex;align-items:center;min-width:142px}
-.brand.brand-lockup img{width:148px;height:auto;display:block}
+.brand.brand-lockup{display:flex;align-items:center;min-width:142px;height:76px;overflow:visible}
+.brand.brand-lockup img{width:148px;height:44px;display:block;object-fit:contain;object-position:center center;flex:0 0 auto}
 .desktop-nav{display:flex;align-items:center;gap:2px;white-space:nowrap}
 .desktop-nav a{padding:10px 12px;border-radius:999px;color:#4d5156;font-size:13px;font-weight:650;letter-spacing:-.01em}
 .desktop-nav a:hover{background:#ebeae5;color:var(--ss-ink)}
